@@ -41,7 +41,7 @@ func TestLRUCache_SetAndGet(t *testing.T) {
 			expectedValue: 1,
 		},
 		{
-			name:          "Update existing Key",
+			name:          "SetBatch existing Key",
 			key:           "a",
 			value:         1,
 			priority:      10,

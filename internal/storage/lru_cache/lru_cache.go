@@ -102,21 +102,9 @@ func (c *lruCache[K, V]) GetValues() []V {
 }
 
 // async set value
-func (c *lruCache[K, V]) Update(rows []CacheItem[K, V]) {
-	appCtx := context.Background()
-	for i := range rows {
-		select {
-		case c.saveChan <- rows[i]:
-		default:
-			//if blocked make new goroutine to save
-			go func(r CacheItem[K, V]) {
-				select {
-				case c.saveChan <- r:
-				case <-appCtx.Done():
-					return
-				}
-			}(rows[i])
-		}
+func (c *lruCache[K, V]) SetBatch(rows []CacheItem[K, V]) {
+	for _, v := range rows {
+		c.Set(v.Key, v.Value, v.Priority)
 	}
 }
 

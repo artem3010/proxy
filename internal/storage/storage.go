@@ -101,8 +101,9 @@ func extractKeys(ids map[string]schema.Row) []string {
 }
 
 func (s *storage) asyncUpdateCache(notFound []schema.Row, ids map[string]schema.Row) {
+	ctx := context.Background()
 	//got elems to save in cache
-	found, err := s.emissionService.GetEmissions(context.Background(), notFound)
+	found, err := s.emissionService.GetEmissions(ctx, notFound)
 	if err != nil {
 		return
 	}
@@ -115,8 +116,8 @@ func (s *storage) asyncUpdateCache(notFound []schema.Row, ids map[string]schema.
 	}
 	keys := extractKeysFromSlice(found)
 	//save elems in both caches
-	s.redisCache.Update(keys, found)
-	s.lruLocalCache.Update(toCacheEntities(found))
+	s.redisCache.SetBatch(ctx, keys, found)
+	s.lruLocalCache.SetBatch(toCacheEntities(found))
 }
 
 func toCacheEntities(found []schema.Row) []lru.CacheItem[string, schema.Row] {
@@ -170,7 +171,7 @@ func (s *storage) fetchFromRedis(ctx context.Context, ids []schema.Row, out chan
 				},
 			})
 		}
-		s.lruLocalCache.Update(update)
+		s.lruLocalCache.SetBatch(update)
 	}
 }
 
@@ -213,8 +214,8 @@ func (s *storage) runDailyUpdater(ctx context.Context, periodHour time.Duration)
 			keys := s.lruLocalCache.GetValues()
 			emissions, _ := s.emissionService.GetEmissions(ctx, keys)
 
-			s.lruLocalCache.Update(toCacheEntities(emissions))
-			s.redisCache.Update(extractKeysFromSlice(emissions), emissions)
+			s.lruLocalCache.SetBatch(toCacheEntities(emissions))
+			s.redisCache.SetBatch(ctx, extractKeysFromSlice(emissions), emissions)
 
 		case <-ctx.Done():
 			return

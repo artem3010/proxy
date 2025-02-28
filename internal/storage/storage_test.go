@@ -23,7 +23,7 @@ func (m *lruCacheMock) GetValues() []schema.Row {
 	return m.GetValues()
 }
 
-func (m *lruCacheMock) Update(rows []lru.CacheItem[string, schema.Row]) {
+func (m *lruCacheMock) SetBatch(rows []lru.CacheItem[string, schema.Row]) {
 	if m.updateFunc != nil {
 		m.updateFunc(rows)
 	}
@@ -42,8 +42,8 @@ func (m *redisCacheMock) BatchGet(ctx context.Context, keys []string) ([]schema.
 	return m.batchGetFunc(ctx, keys)
 }
 
-func (m *redisCacheMock) Update(keys []string, values []schema.Row) {
-	m.Update(keys, values)
+func (m *redisCacheMock) SetBatch(keys []string, values []schema.Row) {
+	m.SetBatch(keys, values)
 }
 
 type emissionClientMock struct {

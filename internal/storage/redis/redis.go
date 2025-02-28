@@ -69,29 +69,16 @@ func (c *client[V]) Get(ctx context.Context, key string) (V, error) {
 	return c.unmarshal(strValue)
 }
 
-// Update async save
-func (c *client[V]) Update(keys []string, values []V) {
-	for i := range values {
-		select {
-		case c.saveChan <- redisEntity[V]{
-			key:   keys[i],
-			value: values[i],
-		}:
-		default:
-			//if blocked do new goroutine
-			go func(key string, value V) {
-				appCtx := context.Background()
-				select {
-
-				case c.saveChan <- redisEntity[V]{
-					key:   key,
-					value: value,
-				}:
-				case <-appCtx.Done():
-					return
-				}
-			}(keys[i], values[i])
-		}
+// SetBatch async save
+func (c *client[V]) SetBatch(ctx context.Context, keys []string, values []V) {
+	pipeline := c.rdb.Pipeline()
+	for i, v := range values {
+		pipeline.Set(ctx, keys[i], v, 24*time.Hour)
+	}
+	_, err := pipeline.Exec(ctx)
+	if err != nil {
+		log.Err(err).Msg("error during saving in redis")
+		return
 	}
 }
 
