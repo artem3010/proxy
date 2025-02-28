@@ -2,6 +2,7 @@ package wrapper
 
 import (
 	"context"
+	"fmt"
 	"proxy/internal/dto/socope_v3_dto"
 	"proxy/internal/schema"
 	"time"
@@ -31,7 +32,7 @@ func (s *Service) GetEmissions(ctx context.Context, inventoryIds []schema.Row) (
 
 	emissions, err := s.emissionClient.FetchEmissions(ctx, toDto(inventoryIds))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error in emission client request %s", err)
 	}
 
 	result := toSchema(emissions)
