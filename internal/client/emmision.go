@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"proxy/internal/dto/socope_v3_dto"
+	"time"
 )
 
 type Client struct {
@@ -14,13 +15,15 @@ type Client struct {
 	client *http.Client
 }
 
-func NewClient(apiURL string) (*Client, error) {
+func NewClient(apiURL string, timeout time.Duration) (*Client, error) {
 	if apiURL == "" {
 		return nil, errors.New("api url is empty")
 	}
 	return &Client{
 		APIURL: apiURL,
-		client: &http.Client{},
+		client: &http.Client{
+			Timeout: timeout,
+		},
 	}, nil
 }
 

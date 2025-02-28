@@ -10,6 +10,7 @@ import (
 	"proxy/internal/dto/socope_v3_dto"
 	"strings"
 	"testing"
+	"time"
 )
 
 // roundTripFunc позволяет подменять выполнение HTTP-запроса.
@@ -24,11 +25,12 @@ func TestNewClient(t *testing.T) {
 		name        string
 		inputURL    string
 		expectedURL string
+		wantErr     bool
 	}{
 		{
-			name:        "ok, default url",
-			inputURL:    "",
-			expectedURL: defaultAPIURL,
+			name:     "err, empty url",
+			inputURL: "",
+			wantErr:  true,
 		},
 		{
 			name:        "user URL",
@@ -39,7 +41,10 @@ func TestNewClient(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			client := NewClient(tc.inputURL)
+			client, err := NewClient(tc.inputURL, 1*time.Millisecond)
+			if tc.wantErr && err != nil {
+				return
+			}
 			if client.APIURL != tc.expectedURL {
 				t.Errorf("ожидали APIURL = %q, получили %q", tc.expectedURL, client.APIURL)
 			}
@@ -147,7 +152,7 @@ func TestFetchEmissions(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc // capture range variable
 		t.Run(tc.name, func(t *testing.T) {
-			client := NewClient("http://dummy")
+			client, _ := NewClient("http://dummy", 0)
 			client.client.Transport = tc.transport
 
 			ctx := context.Background()
