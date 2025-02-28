@@ -18,7 +18,7 @@ func startWarmUpper(ctx context.Context,
 	redisAddr string,
 	redisPassword string,
 	redisDb int,
-	warmupSaverPeriod int64,
+	warmupSaverPeriod time.Duration,
 	cache *lru_cache.LRUCache[string, schema.Row],
 	storage *storage.Storage,
 ) {
@@ -28,7 +28,7 @@ func startWarmUpper(ctx context.Context,
 		DB:       redisDb,
 	})
 
-	go exportIDsPeriodically(ctx, time.Duration(warmupSaverPeriod)*time.Hour, cache, redis)
+	go exportIDsPeriodically(ctx, warmupSaverPeriod, cache, redis)
 
 	go warmup(ctx, redis, storage)
 }

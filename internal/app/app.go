@@ -59,24 +59,24 @@ func (a *App) Run() (exitCode int) {
 		log.Error().Msg("can't parse LRU_CHAN_SIZE")
 		return 1
 	}
-	emissionTimeoutMs, err := strconv.ParseInt(env.GetEnv("EMISSION_TIMEOUT_MS", "1000"), 10, 64)
+	emissionTimeout, err := time.ParseDuration(env.GetEnv("EMISSION_TIMEOUT", "1000ms"))
 	if err != nil {
-		log.Error().Msg("can't parse EMISSION_TIMEOUT_MS")
+		log.Error().Msg("can't parse EMISSION_TIMEOUT")
 		return 1
 	}
-	updatePeriod, err := strconv.ParseInt(env.GetEnv("UPDATE_CACHE_PERIOD_HOUR", "1000"), 10, 64)
+	updatePeriod, err := time.ParseDuration(env.GetEnv("UPDATE_CACHE_PERIOD", "24h"))
 	if err != nil {
 		log.Error().Msg("can't parse UPDATE_CACHE_PERIOD_HOUR")
 		return 1
 	}
-	apiTimeout, err := strconv.ParseInt(env.GetEnv("V1_MEASURE_TIMEOUT_MS", "100"), 10, 64)
+	apiTimeout, err := time.ParseDuration(env.GetEnv("V1_MEASURE_TIMEOUT", "100ms"))
 	if err != nil {
-		log.Error().Msg("can't parse V1_MEASURE_TIMEOUT_MS")
+		log.Error().Msg("can't parse V1_MEASURE_TIMEOUT")
 		return 1
 	}
-	warmupSaverPeriod, err := strconv.ParseInt(env.GetEnv("WARMUP_SAVER_PERIOD_HOUR", "1"), 10, 64)
+	warmupSaverPeriod, err := time.ParseDuration(env.GetEnv("WARMUP_SAVER_PERIOD", "1h"))
 	if err != nil {
-		log.Error().Msg("can't parse V1_MEASURE_TIMEOUT_MS")
+		log.Error().Msg("can't parse WARMUP_SAVER_PERIOD")
 		return 1
 	}
 	apiUrl := env.GetEnv("EMISSION_URL", "http://localhost:8081/v2/measure")
@@ -97,7 +97,7 @@ func (a *App) Run() (exitCode int) {
 		redisAsyncChanSize,
 	)
 	emissionClient := client.NewClient(apiUrl)
-	emissionWrapper := wrapper.New(emissionClient, time.Duration(emissionTimeoutMs)*time.Millisecond)
+	emissionWrapper := wrapper.New(emissionClient, emissionTimeout)
 	emissionStorage := storage.New(ctx, lruCache, redis, emissionWrapper, updatePeriod)
 
 	proxyHandel := handler.New(emissionStorage, apiTimeout)

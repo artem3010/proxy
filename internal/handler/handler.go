@@ -16,10 +16,10 @@ type Handler struct {
 	requestTimeout time.Duration
 }
 
-func New(measureGetter measureGetter, timeout int64) *Handler {
+func New(measureGetter measureGetter, timeout time.Duration) *Handler {
 	return &Handler{
 		measureGetter:  measureGetter,
-		requestTimeout: time.Duration(timeout) * time.Millisecond,
+		requestTimeout: timeout,
 	}
 }
 

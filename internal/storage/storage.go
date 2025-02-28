@@ -22,7 +22,7 @@ func New(ctx context.Context,
 	lruLocalCache lruLocalCache[string, schema.Row],
 	redisCache redisCache[schema.Row],
 	emissionService emissionClient,
-	periodHour int64) *Storage {
+	periodHour time.Duration) *Storage {
 	storage := &Storage{
 		lruLocalCache:   lruLocalCache,
 		redisCache:      redisCache,
@@ -200,8 +200,8 @@ func (s *Storage) fetchFromEmission(ctx context.Context, ids []schema.Row, out c
 }
 
 // updater, that updates values in caches
-func (s *Storage) runDailyUpdater(ctx context.Context, periodHour int64) {
-	ticker := time.NewTicker(time.Duration(periodHour) * time.Hour)
+func (s *Storage) runDailyUpdater(ctx context.Context, periodHour time.Duration) {
+	ticker := time.NewTicker(periodHour)
 	defer ticker.Stop()
 
 	for {
