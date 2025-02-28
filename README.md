@@ -81,7 +81,7 @@ A `Makefile` is provided to simplify common tasks.
   ```bash
   docker-compose down --rmi all
   
-## Test of result 
+## Result of a load test
 ### Without warming up
 ![img_1.png](doc/img_1.png)
 
