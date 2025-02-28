@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
-	"proxy/internal/storage/local_lru_cache"
+	"proxy/internal/storage/lru_cache"
 	"reflect"
 	"testing"
 	"time"
@@ -13,7 +13,7 @@ import (
 
 type lruCacheMock struct {
 	batchGetFunc func(keys []string) ([]schema.Row, []string)
-	updateFunc   func(rows []local_lru_cache.CacheItem[string, schema.Row])
+	updateFunc   func(rows []lru_cache.CacheItem[string, schema.Row])
 }
 
 func (m *lruCacheMock) BatchGet(keys []string) ([]schema.Row, []string) {
@@ -23,7 +23,7 @@ func (m *lruCacheMock) GetValues() []schema.Row {
 	return m.GetValues()
 }
 
-func (m *lruCacheMock) Update(rows []local_lru_cache.CacheItem[string, schema.Row]) {
+func (m *lruCacheMock) Update(rows []lru_cache.CacheItem[string, schema.Row]) {
 	if m.updateFunc != nil {
 		m.updateFunc(rows)
 	}
@@ -208,7 +208,7 @@ func TestStorage_Get(t *testing.T) {
 
 			lruMock := &lruCacheMock{
 				batchGetFunc: tc.lruBatchGet,
-				updateFunc:   func(rows []local_lru_cache.CacheItem[string, schema.Row]) {},
+				updateFunc:   func(rows []lru_cache.CacheItem[string, schema.Row]) {},
 			}
 			redisMock := &redisCacheMock{
 				batchGetFunc: tc.redisBatchGet,

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"proxy/internal/schema"
 	"proxy/internal/storage"
-	"proxy/internal/storage/local_lru_cache"
+	"proxy/internal/storage/lru_cache"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -19,7 +19,7 @@ func startWarmUpper(ctx context.Context,
 	redisPassword string,
 	redisDb int,
 	warmupSaverPeriod int64,
-	cache *local_lru_cache.LRUCache[string, schema.Row],
+	cache *lru_cache.LRUCache[string, schema.Row],
 	storage *storage.Storage,
 ) {
 	redis := redis.NewClient(&redis.Options{
@@ -70,7 +70,7 @@ func toMap(rows []string) map[string]schema.Row {
 	return result
 }
 
-func exportIDsPeriodically(ctx context.Context, interval time.Duration, cache *local_lru_cache.LRUCache[string, schema.Row], redis *redis.Client) {
+func exportIDsPeriodically(ctx context.Context, interval time.Duration, cache *lru_cache.LRUCache[string, schema.Row], redis *redis.Client) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 

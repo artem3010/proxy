@@ -10,7 +10,7 @@ import (
 	"proxy/internal/handler"
 	"proxy/internal/schema"
 	"proxy/internal/storage"
-	"proxy/internal/storage/local_lru_cache"
+	"proxy/internal/storage/lru_cache"
 	redisStorage "proxy/internal/storage/redis"
 	"proxy/internal/wrapper"
 	"proxy/middleware"
@@ -84,7 +84,7 @@ func (a *App) Run() (exitCode int) {
 		log.Error().Msg("can't parse EMISSION_URL")
 		return 1
 	}
-	lruCache := local_lru_cache.NewLRUCache[string, schema.Row](ctx,
+	lruCache := lru_cache.NewLRUCache[string, schema.Row](ctx,
 		lruCacheSize,
 		lruChanSize,
 	)

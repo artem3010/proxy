@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"proxy/internal/schema"
-	"proxy/internal/storage/local_lru_cache"
+	"proxy/internal/storage/lru_cache"
 	"time"
 )
 
@@ -13,7 +13,7 @@ type emissionClient interface {
 
 type lruLocalCache[K comparable, V any] interface {
 	BatchGet(keys []K) ([]V, []K)
-	Update(rows []local_lru_cache.CacheItem[K, V])
+	Update(rows []lru_cache.CacheItem[K, V])
 	GetValues() []V
 }
 type redisCache[V any] interface {

@@ -1,4 +1,4 @@
-package local_lru_cache
+package lru_cache
 
 import (
 	"container/list"

@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"proxy/internal/schema"
-	"proxy/internal/storage/local_lru_cache"
+	"proxy/internal/storage/lru_cache"
 	"time"
 )
 
@@ -117,11 +117,11 @@ func (s *Storage) asyncUpdateCache(notFound []schema.Row, ids map[string]schema.
 	s.lruLocalCache.Update(toCacheEntities(found))
 }
 
-func toCacheEntities(found []schema.Row) []local_lru_cache.CacheItem[string, schema.Row] {
-	result := make([]local_lru_cache.CacheItem[string, schema.Row], 0, len(found))
+func toCacheEntities(found []schema.Row) []lru_cache.CacheItem[string, schema.Row] {
+	result := make([]lru_cache.CacheItem[string, schema.Row], 0, len(found))
 
 	for _, val := range found {
-		result = append(result, local_lru_cache.CacheItem[string, schema.Row]{
+		result = append(result, lru_cache.CacheItem[string, schema.Row]{
 			Key:      val.InventoryId,
 			Value:    val,
 			Priority: val.Priority,
@@ -156,9 +156,9 @@ func (s *Storage) fetchFromRedis(ctx context.Context, ids []schema.Row, out chan
 	}
 	out <- res
 	if len(res.found) != 0 {
-		update := make([]local_lru_cache.CacheItem[string, schema.Row], 0, len(res.found))
+		update := make([]lru_cache.CacheItem[string, schema.Row], 0, len(res.found))
 		for _, val := range res.found {
-			update = append(update, local_lru_cache.CacheItem[string, schema.Row]{
+			update = append(update, lru_cache.CacheItem[string, schema.Row]{
 				Key:      val.InventoryId,
 				Priority: inventoryIds[val.InventoryId].Priority,
 				Value: schema.Row{
