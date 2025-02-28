@@ -10,8 +10,8 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// common wrapper above a redis, with async saver
-type Client[V any] struct {
+// client common wrapper above a redis, with async saver
+type client[V any] struct {
 	rdb       *redis.Client
 	marshal   func(V) (string, error)
 	unmarshal func(string) (V, error)
@@ -23,13 +23,14 @@ type redisEntity[V any] struct {
 	value V
 }
 
-func NewClient[V any](ctx context.Context,
+// New return instance of redis wrapper
+func New[V any](ctx context.Context,
 	addr string,
 	password string,
 	db int,
 	marshal func(V) (string, error),
 	unmarshal func(string) (V, error),
-	chanSize int) *Client[V] {
+	chanSize int) *client[V] {
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
@@ -37,7 +38,7 @@ func NewClient[V any](ctx context.Context,
 		DB:       db,
 	})
 
-	client := &Client[V]{
+	client := &client[V]{
 		rdb:       rdb,
 		marshal:   marshal,
 		unmarshal: unmarshal,
@@ -50,7 +51,8 @@ func NewClient[V any](ctx context.Context,
 	return client
 }
 
-func (c *Client[V]) Set(ctx context.Context, key string, value V, expiration time.Duration) error {
+// Set put value and duration
+func (c *client[V]) Set(ctx context.Context, key string, value V, expiration time.Duration) error {
 	strValue, err := c.marshal(value)
 	if err != nil {
 		return err
@@ -58,7 +60,7 @@ func (c *Client[V]) Set(ctx context.Context, key string, value V, expiration tim
 	return c.rdb.Set(ctx, key, strValue, expiration).Err()
 }
 
-func (c *Client[V]) Get(ctx context.Context, key string) (V, error) {
+func (c *client[V]) Get(ctx context.Context, key string) (V, error) {
 	strValue, err := c.rdb.Get(ctx, key).Result()
 	if err != nil {
 		var zero V
@@ -67,8 +69,8 @@ func (c *Client[V]) Get(ctx context.Context, key string) (V, error) {
 	return c.unmarshal(strValue)
 }
 
-// async save
-func (c *Client[V]) Update(keys []string, values []V) {
+// Update async save
+func (c *client[V]) Update(keys []string, values []V) {
 	for i := range values {
 		select {
 		case c.saveChan <- redisEntity[V]{
@@ -93,7 +95,8 @@ func (c *Client[V]) Update(keys []string, values []V) {
 	}
 }
 
-func (c *Client[V]) BatchGet(ctx context.Context, keys []string) ([]V, []string, error) {
+// BatchGet get several values
+func (c *client[V]) BatchGet(ctx context.Context, keys []string) ([]V, []string, error) {
 	results, err := c.rdb.MGet(ctx, keys...).Result()
 	if err != nil {
 		return nil, nil, err
@@ -122,7 +125,7 @@ func (c *Client[V]) BatchGet(ctx context.Context, keys []string) ([]V, []string,
 	return res, notFound, nil
 }
 
-func (c *Client[V]) runUpdater(ctx context.Context) {
+func (c *client[V]) runUpdater(ctx context.Context) {
 	for {
 		select {
 		case entity, ok := <-c.saveChan:

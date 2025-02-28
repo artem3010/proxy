@@ -7,7 +7,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"proxy/internal/dto/socope_v3_dto"
+	socopev3dto "proxy/internal/dto/socope_v3_dto"
 	"strings"
 	"testing"
 	"time"
@@ -53,11 +53,11 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestFetchEmissions(t *testing.T) {
-	expectedResponse := socope_v3_dto.ResponseBody{
-		Rows: []socope_v3_dto.ResponseRow{
+	expectedResponse := socopev3dto.ResponseBody{
+		Rows: []socopev3dto.ResponseRow{
 			{
 				InventoryID: "123",
-				EmissionsBreakdown: socope_v3_dto.EmissionsBreakdown{
+				EmissionsBreakdown: socopev3dto.EmissionsBreakdown{
 					TotalEmissionsGrams:  100.0,
 					InventoryCoverage:    "full",
 					ClimateRiskCompliant: true,
@@ -70,8 +70,8 @@ func TestFetchEmissions(t *testing.T) {
 	testCases := []struct {
 		name             string
 		transport        http.RoundTripper
-		request          socope_v3_dto.RequestBody
-		expectedResponse *socope_v3_dto.ResponseBody
+		request          socopev3dto.RequestBody
+		expectedResponse *socopev3dto.ResponseBody
 		expectedError    string
 	}{
 		{
@@ -90,8 +90,8 @@ func TestFetchEmissions(t *testing.T) {
 					Header:     make(http.Header),
 				}, nil
 			}),
-			request: socope_v3_dto.RequestBody{
-				Rows: []socope_v3_dto.RequestRow{
+			request: socopev3dto.RequestBody{
+				Rows: []socopev3dto.RequestRow{
 					{InventoryID: "123", Priority: 1},
 				},
 			},
@@ -108,8 +108,8 @@ func TestFetchEmissions(t *testing.T) {
 					Header:     make(http.Header),
 				}, nil
 			}),
-			request: socope_v3_dto.RequestBody{
-				Rows: []socope_v3_dto.RequestRow{
+			request: socopev3dto.RequestBody{
+				Rows: []socopev3dto.RequestRow{
 					{InventoryID: "123", Priority: 1},
 				},
 			},
@@ -121,8 +121,8 @@ func TestFetchEmissions(t *testing.T) {
 			transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
 				return nil, errors.New("network error")
 			}),
-			request: socope_v3_dto.RequestBody{
-				Rows: []socope_v3_dto.RequestRow{
+			request: socopev3dto.RequestBody{
+				Rows: []socopev3dto.RequestRow{
 					{InventoryID: "123", Priority: 1},
 				},
 			},
@@ -138,8 +138,8 @@ func TestFetchEmissions(t *testing.T) {
 					Header:     make(http.Header),
 				}, nil
 			}),
-			request: socope_v3_dto.RequestBody{
-				Rows: []socope_v3_dto.RequestRow{
+			request: socopev3dto.RequestBody{
+				Rows: []socopev3dto.RequestRow{
 					{InventoryID: "123", Priority: 1},
 				},
 			},

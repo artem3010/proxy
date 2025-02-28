@@ -35,7 +35,7 @@ func TestClient_Set(t *testing.T) {
 	// Create a redis client mock.
 	db, mock := redismock.NewClientMock()
 	// Create our generic client with V = string.
-	client := NewClient[string](context.Background(), "localhost:6379", "", 0, testMarshal, testUnmarshal, 1000)
+	client := New[string](context.Background(), "localhost:6379", "", 0, testMarshal, testUnmarshal, 1000)
 	// Override the rdb with our mock.
 	client.rdb = db
 
@@ -58,7 +58,7 @@ func TestClient_Set(t *testing.T) {
 
 func TestClient_Get(t *testing.T) {
 	db, mock := redismock.NewClientMock()
-	client := NewClient[string](context.Background(), "localhost:6379", "", 0, testMarshal, testUnmarshal, 1000)
+	client := New[string](context.Background(), "localhost:6379", "", 0, testMarshal, testUnmarshal, 1000)
 	client.rdb = db
 
 	ctx := context.Background()
@@ -123,7 +123,7 @@ func TestClient_BatchGet(t *testing.T) {
 		tc := tc // capture loop variable
 		t.Run(tc.name, func(t *testing.T) {
 			db, mock := redismock.NewClientMock()
-			client := NewClient[string](context.Background(), "localhost:6379", "", 0, testMarshal, testUnmarshal, 1000)
+			client := New[string](context.Background(), "localhost:6379", "", 0, testMarshal, testUnmarshal, 1000)
 			client.rdb = db
 
 			ctx := context.Background()

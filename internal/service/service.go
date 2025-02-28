@@ -5,17 +5,19 @@ import (
 	"proxy/internal/schema"
 )
 
-type Service struct {
+type service struct {
 	storage storage
 }
 
-func New(storage storage) *Service {
-	return &Service{
+// New returns service for emissions
+func New(storage storage) *service {
+	return &service{
 		storage: storage,
 	}
 }
 
-func (s *Service) Get(ctx context.Context, inventoryIds []schema.Row) ([]schema.Row, error) {
+// Get returns emissions for ids
+func (s *service) Get(ctx context.Context, inventoryIds []schema.Row) ([]schema.Row, error) {
 	if len(inventoryIds) == 0 {
 		return []schema.Row{}, nil
 	}

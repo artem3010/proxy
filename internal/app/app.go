@@ -9,7 +9,7 @@ import (
 	"proxy/internal/env"
 	"proxy/internal/handler"
 	"proxy/internal/schema"
-	"proxy/internal/storage"
+	emissionStorage "proxy/internal/storage"
 	"proxy/internal/storage/lru_cache"
 	redisStorage "proxy/internal/storage/redis"
 	"proxy/internal/wrapper"
@@ -21,17 +21,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type App struct{}
+type app struct{}
 
 const (
 	successCode = 0
 )
 
-func New() *App {
-	return &App{}
+// New create new instance of app
+func New() *app {
+	return &app{}
 }
 
-func (a *App) Run() (exitCode int) {
+// Run start the app
+func (a *app) Run() (exitCode int) {
 	ctx := context.Background()
 
 	env.LoadEnv()
@@ -84,11 +86,11 @@ func (a *App) Run() (exitCode int) {
 		log.Error().Msg("can't parse EMISSION_URL")
 		return 1
 	}
-	lruCache := lru_cache.NewLRUCache[string, schema.Row](ctx,
+	lruCache := lru.New[string, schema.Row](ctx,
 		lruCacheSize,
 		lruChanSize,
 	)
-	redis := redisStorage.NewClient[schema.Row](ctx,
+	redis := redisStorage.New[schema.Row](ctx,
 		redisAddr,
 		redisPassword,
 		redisDb,
@@ -102,7 +104,7 @@ func (a *App) Run() (exitCode int) {
 		return 1
 	}
 	emissionWrapper := wrapper.New(emissionClient, emissionTimeout)
-	emissionStorage := storage.New(ctx, lruCache, redis, emissionWrapper, updatePeriod)
+	emissionStorage := emissionStorage.New(ctx, lruCache, redis, emissionWrapper, updatePeriod)
 
 	proxyHandel := handler.New(emissionStorage, apiTimeout)
 

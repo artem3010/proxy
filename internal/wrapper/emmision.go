@@ -3,26 +3,27 @@ package wrapper
 import (
 	"context"
 	"fmt"
-	"proxy/internal/dto/socope_v3_dto"
+	socopev3dto "proxy/internal/dto/socope_v3_dto"
 	"proxy/internal/schema"
 	"time"
 )
 
-type Service struct {
+type service struct {
 	emissionClient emissionClient
 	timeout        time.Duration
 }
 
+// New returns a wrapper above scopeV3
 func New(emissionClient emissionClient,
 	timeout time.Duration,
-) *Service {
-	return &Service{
+) *service {
+	return &service{
 		emissionClient: emissionClient,
 		timeout:        timeout,
 	}
 }
 
-func (s *Service) GetEmissions(ctx context.Context, inventoryIds []schema.Row) ([]schema.Row, error) {
+func (s *service) GetEmissions(ctx context.Context, inventoryIds []schema.Row) ([]schema.Row, error) {
 	if len(inventoryIds) == 0 {
 		return []schema.Row{}, nil
 	}
@@ -40,7 +41,7 @@ func (s *Service) GetEmissions(ctx context.Context, inventoryIds []schema.Row) (
 	return result, nil
 }
 
-func toSchema(emissions *socope_v3_dto.ResponseBody) []schema.Row {
+func toSchema(emissions *socopev3dto.ResponseBody) []schema.Row {
 	rows := make([]schema.Row, 0, len(emissions.Rows))
 
 	for _, val := range emissions.Rows {
@@ -56,18 +57,18 @@ func toSchema(emissions *socope_v3_dto.ResponseBody) []schema.Row {
 	return rows
 }
 
-func toDto(ids []schema.Row) socope_v3_dto.RequestBody {
+func toDto(ids []schema.Row) socopev3dto.RequestBody {
 
-	rows := make([]socope_v3_dto.RequestRow, 0, len(ids))
+	rows := make([]socopev3dto.RequestRow, 0, len(ids))
 
 	for _, val := range ids {
-		rows = append(rows, socope_v3_dto.RequestRow{
+		rows = append(rows, socopev3dto.RequestRow{
 			InventoryID: val.InventoryId,
 			Priority:    val.Priority,
 		})
 	}
 
-	return socope_v3_dto.RequestBody{
+	return socopev3dto.RequestBody{
 		Rows: rows,
 	}
 }

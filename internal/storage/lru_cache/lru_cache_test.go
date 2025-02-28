@@ -1,4 +1,4 @@
-package lru_cache
+package lru
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 // TestNewLRUCache verifies that a newly created cache is empty and has the correct capacity.
 func TestNewLRUCache(t *testing.T) {
-	cache := NewLRUCache[string, int](context.Background(), 5, 5)
+	cache := New[string, int](context.Background(), 5, 5)
 	if cache.capacity != 5 {
 		t.Errorf("expected capacity 5, got %d", cache.capacity)
 	}
@@ -52,7 +52,7 @@ func TestLRUCache_SetAndGet(t *testing.T) {
 		},
 	}
 
-	cache := NewLRUCache[string, int](context.Background(), 5, 5)
+	cache := New[string, int](context.Background(), 5, 5)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			cache.Set(tc.key, tc.value, tc.priority)
@@ -73,7 +73,7 @@ func TestLRUCache_SetAndGet(t *testing.T) {
 
 // TestLRUCache_Delete verifies that after deletion a Key is no longer available.
 func TestLRUCache_Delete(t *testing.T) {
-	cache := NewLRUCache[string, int](context.Background(), 5, 5)
+	cache := New[string, int](context.Background(), 5, 5)
 	cache.Set("a", 1, 10)
 	cache.Delete("a")
 	if _, ok := cache.Get("a"); ok {
@@ -83,7 +83,7 @@ func TestLRUCache_Delete(t *testing.T) {
 
 // TestLRUCache_BatchGet verifies that BatchGet returns values for found keys and a list of not-found keys.
 func TestLRUCache_BatchGet(t *testing.T) {
-	cache := NewLRUCache[string, int](context.Background(), 5, 5)
+	cache := New[string, int](context.Background(), 5, 5)
 	cache.Set("a", 1, 10)
 	cache.Set("b", 2, 20)
 	// Request keys "a" and "c" (where "c" is missing).
@@ -101,7 +101,7 @@ func TestLRUCache_BatchGet(t *testing.T) {
 // TestLRUCache_Eviction verifies that when capacity is exceeded, a candidate is evicted.
 func TestLRUCache_Eviction(t *testing.T) {
 	// Create a cache with capacity 2.
-	cache := NewLRUCache[string, int](context.Background(), 2, 5)
+	cache := New[string, int](context.Background(), 2, 5)
 	// Insert two items.
 	cache.Set("a", 1, 10) // Priority 10
 	cache.Set("b", 2, 20) // Priority 20

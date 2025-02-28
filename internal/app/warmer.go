@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"proxy/internal/schema"
-	"proxy/internal/storage"
-	"proxy/internal/storage/lru_cache"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -19,8 +17,8 @@ func startWarmUpper(ctx context.Context,
 	redisPassword string,
 	redisDb int,
 	warmupSaverPeriod time.Duration,
-	cache *lru_cache.LRUCache[string, schema.Row],
-	storage *storage.Storage,
+	cache lruCache[string, schema.Row],
+	storage storage,
 ) {
 	redis := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
@@ -33,7 +31,7 @@ func startWarmUpper(ctx context.Context,
 	go warmup(ctx, redis, storage)
 }
 
-func warmup(ctx context.Context, redis *redis.Client, s *storage.Storage) {
+func warmup(ctx context.Context, redis *redis.Client, s storage) {
 	select {
 	case <-ctx.Done():
 		log.Info().Msg("ExportIDsPeriodically: context canceled, stopping export goroutine")
@@ -70,7 +68,7 @@ func toMap(rows []string) map[string]schema.Row {
 	return result
 }
 
-func exportIDsPeriodically(ctx context.Context, interval time.Duration, cache *lru_cache.LRUCache[string, schema.Row], redis *redis.Client) {
+func exportIDsPeriodically(ctx context.Context, interval time.Duration, cache lruCache[string, schema.Row], redis *redis.Client) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 

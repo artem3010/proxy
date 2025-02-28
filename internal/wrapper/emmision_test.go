@@ -3,20 +3,20 @@ package wrapper
 import (
 	"context"
 	"errors"
+	socopev3dto "proxy/internal/dto/socope_v3_dto"
 	"reflect"
 	"testing"
 	"time"
 
-	"proxy/internal/dto/socope_v3_dto"
 	"proxy/internal/schema"
 )
 
 // emissionClientMock implements the emissionClient interface for testing.
 type emissionClientMock struct {
-	fetchFunc func(ctx context.Context, request socope_v3_dto.RequestBody) (*socope_v3_dto.ResponseBody, error)
+	fetchFunc func(ctx context.Context, request socopev3dto.RequestBody) (*socopev3dto.ResponseBody, error)
 }
 
-func (m *emissionClientMock) FetchEmissions(ctx context.Context, request socope_v3_dto.RequestBody) (*socope_v3_dto.ResponseBody, error) {
+func (m *emissionClientMock) FetchEmissions(ctx context.Context, request socopev3dto.RequestBody) (*socopev3dto.ResponseBody, error) {
 	return m.fetchFunc(ctx, request)
 }
 
@@ -29,11 +29,11 @@ func TestService_GetEmissions(t *testing.T) {
 			InventoryId: "id2",
 		},
 	}
-	dtoResponse := &socope_v3_dto.ResponseBody{
-		Rows: []socope_v3_dto.ResponseRow{
+	dtoResponse := &socopev3dto.ResponseBody{
+		Rows: []socopev3dto.ResponseRow{
 			{
 				InventoryID: "id1",
-				EmissionsBreakdown: socope_v3_dto.EmissionsBreakdown{
+				EmissionsBreakdown: socopev3dto.EmissionsBreakdown{
 					TotalEmissionsGrams:  100.0,
 					InventoryCoverage:    "full",
 					ClimateRiskCompliant: true,
@@ -41,7 +41,7 @@ func TestService_GetEmissions(t *testing.T) {
 			},
 			{
 				InventoryID: "id2",
-				EmissionsBreakdown: socope_v3_dto.EmissionsBreakdown{
+				EmissionsBreakdown: socopev3dto.EmissionsBreakdown{
 					TotalEmissionsGrams:  200.0,
 					InventoryCoverage:    "partial",
 					ClimateRiskCompliant: false,
@@ -71,7 +71,7 @@ func TestService_GetEmissions(t *testing.T) {
 	testCases := []struct {
 		name          string
 		timeout       time.Duration
-		fetchResponse *socope_v3_dto.ResponseBody
+		fetchResponse *socopev3dto.ResponseBody
 		fetchError    error
 		inputIDs      []schema.Row
 		expectedRows  []schema.Row
@@ -108,12 +108,12 @@ func TestService_GetEmissions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a service with the mocked emission client.
 			mockClient := &emissionClientMock{
-				fetchFunc: func(ctx context.Context, request socope_v3_dto.RequestBody) (*socope_v3_dto.ResponseBody, error) {
+				fetchFunc: func(ctx context.Context, request socopev3dto.RequestBody) (*socopev3dto.ResponseBody, error) {
 					// Optionally, you could check the content of request here.
 					return tc.fetchResponse, tc.fetchError
 				},
 			}
-			svc := &Service{
+			svc := &service{
 				emissionClient: mockClient,
 				timeout:        tc.timeout,
 			}
@@ -148,8 +148,8 @@ func TestToDto(t *testing.T) {
 		},
 	}
 
-	expected := socope_v3_dto.RequestBody{
-		Rows: []socope_v3_dto.RequestRow{
+	expected := socopev3dto.RequestBody{
+		Rows: []socopev3dto.RequestRow{
 			{InventoryID: "id1"},
 			{InventoryID: "id2"},
 			{InventoryID: "id3"},
@@ -163,11 +163,11 @@ func TestToDto(t *testing.T) {
 }
 
 func TestDtoSchema(t *testing.T) {
-	inputResponse := &socope_v3_dto.ResponseBody{
-		Rows: []socope_v3_dto.ResponseRow{
+	inputResponse := &socopev3dto.ResponseBody{
+		Rows: []socopev3dto.ResponseRow{
 			{
 				InventoryID: "id1",
-				EmissionsBreakdown: socope_v3_dto.EmissionsBreakdown{
+				EmissionsBreakdown: socopev3dto.EmissionsBreakdown{
 					TotalEmissionsGrams:  123.4,
 					InventoryCoverage:    "coverage1",
 					ClimateRiskCompliant: true,

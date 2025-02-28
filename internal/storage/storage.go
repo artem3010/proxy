@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type Storage struct {
+type storage struct {
 	lruLocalCache   lruLocalCache[string, schema.Row]
 	redisCache      redisCache[schema.Row]
 	emissionService emissionClient
@@ -18,12 +18,13 @@ type redisRes struct {
 	notFound []schema.Row
 }
 
+// New return storage of emissions
 func New(ctx context.Context,
 	lruLocalCache lruLocalCache[string, schema.Row],
 	redisCache redisCache[schema.Row],
 	emissionService emissionClient,
-	periodHour time.Duration) *Storage {
-	storage := &Storage{
+	periodHour time.Duration) *storage {
+	storage := &storage{
 		lruLocalCache:   lruLocalCache,
 		redisCache:      redisCache,
 		emissionService: emissionService,
@@ -35,7 +36,8 @@ func New(ctx context.Context,
 	return storage
 }
 
-func (s *Storage) Get(ctx context.Context, inventoryIds map[string]schema.Row) ([]schema.Row, error) {
+// Get return emissions by ids
+func (s *storage) Get(ctx context.Context, inventoryIds map[string]schema.Row) ([]schema.Row, error) {
 
 	keys := extractKeys(inventoryIds)
 
@@ -91,14 +93,14 @@ func (s *Storage) Get(ctx context.Context, inventoryIds map[string]schema.Row) (
 
 func extractKeys(ids map[string]schema.Row) []string {
 	result := make([]string, 0, len(ids))
-	for k, _ := range ids {
+	for k := range ids {
 		result = append(result, k)
 	}
 
 	return result
 }
 
-func (s *Storage) asyncUpdateCache(notFound []schema.Row, ids map[string]schema.Row) {
+func (s *storage) asyncUpdateCache(notFound []schema.Row, ids map[string]schema.Row) {
 	//got elems to save in cache
 	found, err := s.emissionService.GetEmissions(context.Background(), notFound)
 	if err != nil {
@@ -117,11 +119,11 @@ func (s *Storage) asyncUpdateCache(notFound []schema.Row, ids map[string]schema.
 	s.lruLocalCache.Update(toCacheEntities(found))
 }
 
-func toCacheEntities(found []schema.Row) []lru_cache.CacheItem[string, schema.Row] {
-	result := make([]lru_cache.CacheItem[string, schema.Row], 0, len(found))
+func toCacheEntities(found []schema.Row) []lru.CacheItem[string, schema.Row] {
+	result := make([]lru.CacheItem[string, schema.Row], 0, len(found))
 
 	for _, val := range found {
-		result = append(result, lru_cache.CacheItem[string, schema.Row]{
+		result = append(result, lru.CacheItem[string, schema.Row]{
 			Key:      val.InventoryId,
 			Value:    val,
 			Priority: val.Priority,
@@ -141,7 +143,7 @@ func extractKeysFromSlice(found []schema.Row) []string {
 }
 
 // gets from redis and send to chan
-func (s *Storage) fetchFromRedis(ctx context.Context, ids []schema.Row, out chan<- redisRes, inventoryIds map[string]schema.Row) {
+func (s *storage) fetchFromRedis(ctx context.Context, ids []schema.Row, out chan<- redisRes, inventoryIds map[string]schema.Row) {
 	var res redisRes
 	select {
 	case <-ctx.Done():
@@ -156,9 +158,9 @@ func (s *Storage) fetchFromRedis(ctx context.Context, ids []schema.Row, out chan
 	}
 	out <- res
 	if len(res.found) != 0 {
-		update := make([]lru_cache.CacheItem[string, schema.Row], 0, len(res.found))
+		update := make([]lru.CacheItem[string, schema.Row], 0, len(res.found))
 		for _, val := range res.found {
-			update = append(update, lru_cache.CacheItem[string, schema.Row]{
+			update = append(update, lru.CacheItem[string, schema.Row]{
 				Key:      val.InventoryId,
 				Priority: inventoryIds[val.InventoryId].Priority,
 				Value: schema.Row{
@@ -183,7 +185,7 @@ func getRows(notFound []string, ids map[string]schema.Row) []schema.Row {
 }
 
 // gets from api and send to chan
-func (s *Storage) fetchFromEmission(ctx context.Context, ids []schema.Row, out chan<- []schema.Row) {
+func (s *storage) fetchFromEmission(ctx context.Context, ids []schema.Row, out chan<- []schema.Row) {
 	var res []schema.Row
 	select {
 	case <-ctx.Done():
@@ -200,7 +202,7 @@ func (s *Storage) fetchFromEmission(ctx context.Context, ids []schema.Row, out c
 }
 
 // updater, that updates values in caches
-func (s *Storage) runDailyUpdater(ctx context.Context, periodHour time.Duration) {
+func (s *storage) runDailyUpdater(ctx context.Context, periodHour time.Duration) {
 	ticker := time.NewTicker(periodHour)
 	defer ticker.Stop()
 

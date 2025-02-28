@@ -1,4 +1,4 @@
-package lru_cache
+package lru
 
 import (
 	"container/list"
@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// CacheItem item of cache
 type CacheItem[K comparable, V any] struct {
 	Key      K
 	Value    V
@@ -21,7 +22,7 @@ Cache based on map of elements, linked list, map of priorities
 when touch an elem move it on the top of linked list
 when need to find an element to delete - searches for elem with max priority
 */
-type LRUCache[K comparable, V any] struct {
+type lruCache[K comparable, V any] struct {
 	capacity      int
 	items         map[K]*list.Element
 	order         *list.List
@@ -31,8 +32,9 @@ type LRUCache[K comparable, V any] struct {
 	saveChan      chan CacheItem[K, V]
 }
 
-func NewLRUCache[K comparable, V any](ctx context.Context, capacity int, lruChanSize int) *LRUCache[K, V] {
-	cache := &LRUCache[K, V]{
+// New return new instance of cache
+func New[K comparable, V any](ctx context.Context, capacity int, lruChanSize int) *lruCache[K, V] {
+	cache := &lruCache[K, V]{
 		capacity:      capacity,
 		items:         make(map[K]*list.Element, capacity),
 		order:         list.New(),
@@ -47,7 +49,7 @@ func NewLRUCache[K comparable, V any](ctx context.Context, capacity int, lruChan
 }
 
 // edit field of max priority
-func (c *LRUCache[K, V]) updateMaxPriorityOnRemoval(removedPriority int) {
+func (c *lruCache[K, V]) updateMaxPriorityOnRemoval(removedPriority int) {
 	c.priorityCount[removedPriority]--
 	if c.priorityCount[removedPriority] == 0 {
 		delete(c.priorityCount, removedPriority)
@@ -64,7 +66,7 @@ func (c *LRUCache[K, V]) updateMaxPriorityOnRemoval(removedPriority int) {
 }
 
 // edit priority map
-func (c *LRUCache[K, V]) updatePriorityCountOnAddition(priority int) {
+func (c *lruCache[K, V]) updatePriorityCountOnAddition(priority int) {
 	c.priorityCount[priority]++
 	if priority > c.maxPriority {
 		c.maxPriority = priority
@@ -72,7 +74,7 @@ func (c *LRUCache[K, V]) updatePriorityCountOnAddition(priority int) {
 }
 
 // get an elem
-func (c *LRUCache[K, V]) Get(key K) (V, bool) {
+func (c *lruCache[K, V]) Get(key K) (V, bool) {
 	c.mu.RLock()
 	elem, ok := c.items[key]
 	c.mu.RUnlock()
@@ -89,7 +91,7 @@ func (c *LRUCache[K, V]) Get(key K) (V, bool) {
 }
 
 // get all values
-func (c *LRUCache[K, V]) GetValues() []V {
+func (c *lruCache[K, V]) GetValues() []V {
 	result := make([]V, 0, len(c.items))
 	c.mu.RLock()
 	for _, v := range c.items {
@@ -100,7 +102,7 @@ func (c *LRUCache[K, V]) GetValues() []V {
 }
 
 // async set value
-func (c *LRUCache[K, V]) Update(rows []CacheItem[K, V]) {
+func (c *lruCache[K, V]) Update(rows []CacheItem[K, V]) {
 	appCtx := context.Background()
 	for i := range rows {
 		select {
@@ -119,7 +121,7 @@ func (c *LRUCache[K, V]) Update(rows []CacheItem[K, V]) {
 }
 
 // sync set value
-func (c *LRUCache[K, V]) Set(key K, value V, priority int) {
+func (c *lruCache[K, V]) Set(key K, value V, priority int) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -166,7 +168,7 @@ func (c *LRUCache[K, V]) Set(key K, value V, priority int) {
 }
 
 // delete an elem
-func (c *LRUCache[K, V]) Delete(key K) {
+func (c *lruCache[K, V]) Delete(key K) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if elem, ok := c.items[key]; ok {
@@ -189,7 +191,7 @@ func (c *LRUCache[K, V]) Delete(key K) {
 	}
 }
 
-func (c *LRUCache[K, V]) BatchGet(keys []K) ([]V, []K) {
+func (c *lruCache[K, V]) BatchGet(keys []K) ([]V, []K) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -208,7 +210,7 @@ func (c *LRUCache[K, V]) BatchGet(keys []K) ([]V, []K) {
 	return result, notFound
 }
 
-func (c *LRUCache[K, V]) runUpdater(ctx context.Context) {
+func (c *lruCache[K, V]) runUpdater(ctx context.Context) {
 	for {
 		select {
 		case row, ok := <-c.saveChan:

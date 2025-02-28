@@ -9,20 +9,21 @@ import (
 	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
-	"proxy/internal/dto/socope_v3_dto"
+	socopev3dto "proxy/internal/dto/socope_v3_dto"
 	"time"
 )
 
-type Client struct {
+type client struct {
 	APIURL string
 	client *http.Client
 }
 
-func NewClient(apiURL string, timeout time.Duration) (*Client, error) {
+// NewClient returns new client
+func NewClient(apiURL string, timeout time.Duration) (*client, error) {
 	if apiURL == "" {
 		return nil, errors.New("api url is empty")
 	}
-	return &Client{
+	return &client{
 		APIURL: apiURL,
 		client: &http.Client{
 			Timeout: timeout,
@@ -30,7 +31,8 @@ func NewClient(apiURL string, timeout time.Duration) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) FetchEmissions(ctx context.Context, request socope_v3_dto.RequestBody) (*socope_v3_dto.ResponseBody, error) {
+// FetchEmissions get emissions
+func (c *client) FetchEmissions(ctx context.Context, request socopev3dto.RequestBody) (*socopev3dto.ResponseBody, error) {
 	requestData, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("err during marshaling of a request: %s", err)
@@ -58,7 +60,7 @@ func (c *Client) FetchEmissions(ctx context.Context, request socope_v3_dto.Reque
 		return nil, errors.New("unexpected status code: " + resp.Status)
 	}
 
-	var response socope_v3_dto.ResponseBody
+	var response socopev3dto.ResponseBody
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("err during unmarshaling of a response: %s", err)
 	}

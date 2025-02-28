@@ -19,26 +19,26 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type RequestRow struct {
+type requestRow struct {
 	Id       string `json:"inventoryId"`
 	Priority int    `json:"priority"`
 }
 
-type RequestBody struct {
-	InventoryIds []RequestRow `json:"inventoryIds"`
+type requestBody struct {
+	InventoryIds []requestRow `json:"inventoryIds"`
 }
 
 func generateRandomPayload(maxRows int) ([]byte, error) {
 	numRows := rand.Intn(maxRows) + 1
-	rows := make([]RequestRow, numRows)
+	rows := make([]requestRow, numRows)
 	for i := 0; i < numRows; i++ {
 		id := rand.Intn(10000)
-		rows[i] = RequestRow{
+		rows[i] = requestRow{
 			Id:       "id" + strconv.Itoa(id),
 			Priority: rand.Intn(50),
 		}
 	}
-	body := RequestBody{InventoryIds: rows}
+	body := requestBody{InventoryIds: rows}
 	return json.Marshal(body)
 }
 

@@ -13,7 +13,7 @@ type emissionClient interface {
 
 type lruLocalCache[K comparable, V any] interface {
 	BatchGet(keys []K) ([]V, []K)
-	Update(rows []lru_cache.CacheItem[K, V])
+	Update(rows []lru.CacheItem[K, V])
 	GetValues() []V
 }
 type redisCache[V any] interface {

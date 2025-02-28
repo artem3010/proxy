@@ -8,27 +8,27 @@ import (
 	"time"
 )
 
-type RequestRow struct {
+type requestRow struct {
 	InventoryID string `json:"inventoryId"`
 }
 
-type RequestBody struct {
-	Rows []RequestRow `json:"rows"`
+type requestBody struct {
+	Rows []requestRow `json:"rows"`
 }
 
-type EmissionsBreakdown struct {
+type emissionsBreakdown struct {
 	TotalEmissionsGrams  float64 `json:"total_emissions_grams"`
 	InventoryCoverage    string  `json:"inventory_coverage"`
 	ClimateRiskCompliant bool    `json:"climate_risk_compliant"`
 }
 
-type ResponseRow struct {
+type responseRow struct {
 	InventoryID        string             `json:"inventoryId"`
-	EmissionsBreakdown EmissionsBreakdown `json:"emissionsBreakdown"`
+	EmissionsBreakdown emissionsBreakdown `json:"emissionsBreakdown"`
 }
 
-type ResponseBody struct {
-	Rows []ResponseRow `json:"rows"`
+type responseBody struct {
+	Rows []responseRow `json:"rows"`
 }
 
 func measureHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func measureHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var requestBody RequestBody
+	var requestBody requestBody
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -47,22 +47,22 @@ func measureHandler(w http.ResponseWriter, r *http.Request) {
 	rand.Seed(time.Now().UnixNano())
 	coverageOptions := []string{"modeled", "measured"}
 
-	var responseRows []ResponseRow
+	var responseRows []responseRow
 	for _, row := range requestBody.Rows {
 		// Генерируем случайные данные для мока
-		responseData := EmissionsBreakdown{
+		responseData := emissionsBreakdown{
 			TotalEmissionsGrams:  rand.Float64()*2000 + 500, // От 500 до 2500 грамм
 			InventoryCoverage:    coverageOptions[rand.Intn(len(coverageOptions))],
 			ClimateRiskCompliant: rand.Intn(2) == 1,
 		}
 
-		responseRows = append(responseRows, ResponseRow{
+		responseRows = append(responseRows, responseRow{
 			InventoryID:        row.InventoryID,
 			EmissionsBreakdown: responseData,
 		})
 	}
 
-	response := ResponseBody{Rows: responseRows}
+	response := responseBody{Rows: responseRows}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
