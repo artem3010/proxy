@@ -97,7 +97,7 @@ func exportIDsPeriodically(ctx context.Context, interval time.Duration, cache *l
 				log.Error().Err(err).Msg("Error compressing cache keys")
 				continue
 			}
-
+			//TODO use shared lock
 			redis.Set(ctx, warmUpKey, data, 0)
 		}
 	}
