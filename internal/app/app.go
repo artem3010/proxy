@@ -96,7 +96,11 @@ func (a *App) Run() (exitCode int) {
 		unmarshalRow,
 		redisAsyncChanSize,
 	)
-	emissionClient := client.NewClient(apiUrl)
+	emissionClient, err := client.NewClient(apiUrl)
+	if err != nil {
+		log.Error().Err(err).Msg("couldn't initialize an emission client")
+		return 1
+	}
 	emissionWrapper := wrapper.New(emissionClient, emissionTimeout)
 	emissionStorage := storage.New(ctx, lruCache, redis, emissionWrapper, updatePeriod)
 

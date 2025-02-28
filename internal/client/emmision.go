@@ -9,21 +9,19 @@ import (
 	"proxy/internal/dto/socope_v3_dto"
 )
 
-const defaultAPIURL = "http://localhost:8080/v2/measure"
-
 type Client struct {
 	APIURL string
 	client *http.Client
 }
 
-func NewClient(apiURL string) *Client {
+func NewClient(apiURL string) (*Client, error) {
 	if apiURL == "" {
-		apiURL = defaultAPIURL
+		return nil, errors.New("api url is empty")
 	}
 	return &Client{
 		APIURL: apiURL,
 		client: &http.Client{},
-	}
+	}, nil
 }
 
 func (c *Client) FetchEmissions(ctx context.Context, request socope_v3_dto.RequestBody) (*socope_v3_dto.ResponseBody, error) {
