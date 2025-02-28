@@ -90,3 +90,9 @@ A `Makefile` is provided to simplify common tasks.
 
 ### RPS
 ![img_2.png](doc/img_2.png)
+
+## TODO
+
+- [ ] use shared lock for warmer saver
+- [ ] write metrics instead of logs
+- [ ] integration tests
