@@ -3,8 +3,9 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/go-redis/redis/v8"
 )

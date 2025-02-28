@@ -3,12 +3,13 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-redis/redis/v8"
-	"github.com/rs/zerolog/log"
 	"proxy/internal/schema"
 	"proxy/internal/storage"
 	"proxy/internal/storage/local_lru_cache"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/rs/zerolog/log"
 )
 
 const warmUpKey = "warmingUpKey"

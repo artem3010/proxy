@@ -4,8 +4,9 @@ import (
 	"container/list"
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"sync"
+
+	"github.com/rs/zerolog/log"
 )
 
 type CacheItem[K comparable, V any] struct {

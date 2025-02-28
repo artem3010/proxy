@@ -3,11 +3,12 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"proxy/internal/dto/measure_v1_dto"
 	"proxy/internal/schema"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Handler struct {

@@ -3,8 +3,6 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"proxy/internal/client"
@@ -18,6 +16,9 @@ import (
 	"proxy/middleware"
 	"strconv"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type App struct{}
