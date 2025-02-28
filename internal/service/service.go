@@ -43,7 +43,7 @@ func removeDuplicates(ids []schema.Row) []schema.Row {
 	allKeys := make(map[string]bool)
 	var list []schema.Row
 	for _, item := range ids {
-		if _, value := allKeys[item.InventoryId]; !value {
+		if !allKeys[item.InventoryId] {
 			allKeys[item.InventoryId] = true
 			list = append(list, item)
 		}
