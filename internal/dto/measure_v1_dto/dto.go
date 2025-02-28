@@ -35,8 +35,3 @@ type ResponseRow struct {
 type ResponseBody struct {
 	Rows []ResponseRow `json:"rows"`
 }
-
-func (r ResponseBody) Validate() error {
-	//FIXME
-	return nil
-}
