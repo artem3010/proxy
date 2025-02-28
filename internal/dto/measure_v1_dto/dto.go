@@ -13,7 +13,7 @@ type InventoryId struct {
 
 func (r RowsRequest) Validate() error {
 	if r.InventoryIds == nil {
-		return errors.New("wrong body")
+		return errors.New("wrong request, missed inventory ids")
 	}
 	return nil
 }
