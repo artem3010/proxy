@@ -4,6 +4,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+RUN rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
+
+RUN adduser -D appuser
+USER appuser
+
 COPY . .
 
 RUN CGO_ENABLED=0 go build -o service ./cmd/service

@@ -2,8 +2,16 @@
 FROM golang:1.23-alpine AS builder
 WORKDIR /app
 
+RUN apk update && apk upgrade
+
 # Устанавливаем git для загрузки зависимостей
 RUN apk add --no-cache git
+
+RUN rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
+
+RUN adduser -D appuser
+USER appuser
 
 # Копируем файлы модулей
 COPY go.mod go.sum ./
