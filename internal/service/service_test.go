@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"errors"
-	"reflect"
 	"strings"
 	"testing"
 
 	"proxy/internal/schema"
+
+	"github.com/stretchr/testify/require"
 )
 
 type storageMock struct {
@@ -124,9 +125,7 @@ func TestService_Get(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 
-			if !reflect.DeepEqual(output, tc.expectedOutput) {
-				t.Errorf("expected output %v, got %v", tc.expectedOutput, output)
-			}
+			require.Equal(t, output, tc.expectedOutput)
 		})
 	}
 }
@@ -220,9 +219,7 @@ func TestCollectToMap(t *testing.T) {
 		tc := tc // capture loop variable
 		t.Run(tc.name, func(t *testing.T) {
 			output := collectToMap(tc.input)
-			if !reflect.DeepEqual(output, tc.expected) {
-				t.Errorf("expected %v, got %v", tc.expected, output)
-			}
+			require.Equal(t, output, tc.expected)
 		})
 	}
 }

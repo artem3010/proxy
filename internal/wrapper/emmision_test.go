@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	socopev3dto "proxy/internal/dto/socope_v3_dto"
-	"reflect"
 	"testing"
 	"time"
 
 	"proxy/internal/schema"
+
+	"github.com/stretchr/testify/require"
 )
 
 // emissionClientMock implements the emissionClient interface for testing.
@@ -128,9 +129,7 @@ func TestService_GetEmissions(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if !reflect.DeepEqual(rows, tc.expectedRows) {
-				t.Errorf("expected rows %v, got %v", tc.expectedRows, rows)
-			}
+			require.Equal(t, rows, tc.expectedRows)
 		})
 	}
 }
@@ -157,9 +156,7 @@ func TestToDto(t *testing.T) {
 	}
 
 	result := toDto(inputIDs)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("expected %v, got %v", expected, result)
-	}
+	require.Equal(t, result, expected)
 }
 
 func TestDtoSchema(t *testing.T) {
@@ -187,7 +184,5 @@ func TestDtoSchema(t *testing.T) {
 	}
 
 	result := toSchema(inputResponse)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("expected %v, got %v", expected, result)
-	}
+	require.Equal(t, result, expected)
 }

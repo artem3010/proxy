@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	lru "proxy/internal/storage/lru_cache"
-	"reflect"
 	"testing"
 	"time"
 
 	"proxy/internal/schema"
+
+	"github.com/stretchr/testify/require"
 )
 
 type lruCacheMock struct {
@@ -42,8 +43,8 @@ func (m *redisCacheMock) BatchGet(ctx context.Context, keys []string) ([]schema.
 	return m.batchGetFunc(ctx, keys)
 }
 
-func (m *redisCacheMock) SetBatch(keys []string, values []schema.Row) {
-	m.SetBatch(keys, values)
+func (m *redisCacheMock) SetBatch(ctx context.Context, keys []string, values []schema.Row) {
+	m.SetBatch(ctx, keys, values)
 }
 
 type emissionClientMock struct {
@@ -228,9 +229,7 @@ func TestStorage_Get(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 
-			if !reflect.DeepEqual(result, tc.expectedResult) {
-				t.Errorf("expected result %v, got %v", tc.expectedResult, result)
-			}
+			require.Equal(t, result, tc.expectedResult)
 		})
 	}
 }
